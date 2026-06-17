@@ -90,8 +90,8 @@ plot_top_pairs_barplot <- function(
 #' @param top_n Number of top pairs to plot when `gene1` and `gene2` are not
 #'   supplied.
 #' @param delta Pairwise expression difference cutoff.
-#' @param score Score used for ROC analysis. `state` uses the 0/1 pair state;
-#'   `difference` uses the continuous expression difference `gene1 - gene2`.
+#' @param score Score used for ROC analysis. `difference` uses the continuous
+#'   expression difference `gene1 - gene2`; `state` uses the 0/1 pair state.
 #' @param response_col Clinical column containing response labels.
 #' @param response_label Label treated as response.
 #' @param use_sig_pairs If `TRUE`, use `result$sig_pairs` when available.
@@ -110,7 +110,7 @@ plot_pair_roc <- function(
     gene2 = NULL,
     top_n = 1,
     delta = 0.25,
-    score = c("state", "difference"),
+    score = c("difference", "state"),
     response_col = "response",
     response_label = "response",
     use_sig_pairs = TRUE,
@@ -144,8 +144,9 @@ plot_pair_roc <- function(
     close_device()
   }, add = TRUE)
 
+  single_pair <- nrow(pairs) == 1
   if (is.null(main)) {
-    main <- if (score == "state") "Pair-state ROC" else "Pair-difference ROC"
+    main <- if (score == "difference") "Pair-difference ROC" else "Pair-state ROC"
   }
 
   graphics::plot(
@@ -191,14 +192,20 @@ plot_pair_roc <- function(
   }
 
   auc_df <- do.call(rbind, auc_rows)
+  pair_labels <- paste(auc_df$gene1, auc_df$gene2, sep = " / ")
   legend_labels <- paste0(
-    auc_df$gene1,
-    " / ",
-    auc_df$gene2,
+    pair_labels,
     " (AUC=",
     sprintf("%.3f", auc_df$auc),
     ")"
   )
+
+  if (single_pair) {
+    graphics::title(
+      main = paste0(main, "\n", legend_labels[1]),
+      line = 1
+    )
+  }
   graphics::legend(
     "bottomright",
     legend = legend_labels,
@@ -206,6 +213,11 @@ plot_pair_roc <- function(
     lwd = 2,
     bty = "n",
     cex = 0.8
+  )
+
+  message(
+    "ROC AUC: ",
+    paste(legend_labels, collapse = "; ")
   )
 
   invisible(auc_df)

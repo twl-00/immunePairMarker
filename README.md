@@ -55,8 +55,7 @@ head(result$sig_pairs)
 Basic downstream plots can be generated directly from the result object:
 
 ```r
-plot_top_pairs_barplot(result, top_n = 10, metric = "adjusted_p")
-plot_pair_roc(result, top_n = 3, score = "state")
+plot_pair_roc(result, top_n = 1)
 plot_pair_state_heatmap(result, top_n = 10)
 ```
 
@@ -204,8 +203,8 @@ inspection:
 
 - `plot_top_pairs_barplot()`: bar plot of top gene pairs by adjusted p-value or
   odds ratio
-- `plot_pair_roc()`: ROC curve for one or more gene pairs, using either binary
-  pair state or continuous expression difference
+- `plot_pair_roc()`: ROC curve for one or more gene pairs, using the continuous
+  expression difference `gene1 - gene2` by default
 - `plot_pair_state_heatmap()`: heatmap of pair states across samples
 - `plot_pair_survival()`: Kaplan-Meier curve when survival time and event
   columns are available
@@ -214,7 +213,7 @@ All plotting functions draw to the active graphics device by default. To save a
 plot directly, provide a file path:
 
 ```r
-plot_pair_roc(result, top_n = 3, file = "pair_roc.pdf")
+plot_pair_roc(result, top_n = 1, file = "pair_roc.pdf")
 plot_pair_state_heatmap(result, top_n = 10, file = "pair_state_heatmap.png")
 ```
 

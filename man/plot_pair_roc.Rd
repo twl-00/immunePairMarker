@@ -10,7 +10,7 @@ plot_pair_roc(
   gene2 = NULL,
   top_n = 1,
   delta = 0.25,
-  score = c("state", "difference"),
+  score = c("difference", "state"),
   response_col = "response",
   response_label = "response",
   use_sig_pairs = TRUE,
@@ -31,7 +31,7 @@ plot_pair_roc(
 
 \item{delta}{Pairwise expression difference cutoff.}
 
-\item{score}{Score used for ROC analysis. \code{state} uses the 0/1 pair state; \code{difference} uses the continuous expression difference \code{gene1 - gene2}.}
+\item{score}{Score used for ROC analysis. \code{difference} uses the continuous expression difference \code{gene1 - gene2}; \code{state} uses the 0/1 pair state.}
 
 \item{response_col}{Clinical column containing response labels.}
 
