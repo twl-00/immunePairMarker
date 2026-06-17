@@ -25,6 +25,13 @@ test_that("ROC helper returns high AUC for ordered scores", {
   expect_false(roc$reversed)
 })
 
+test_that("HR labels do not print rounded zero", {
+  format_hr <- getFromNamespace(".format_hr", "immunePair")
+
+  expect_equal(format_hr(0.0001), "< 0.01")
+  expect_equal(format_hr(0.8), "= 0.80")
+})
+
 test_that("plot pair selector prefers significant pairs", {
   result <- list(
     pairs = data.frame(

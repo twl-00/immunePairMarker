@@ -260,7 +260,7 @@ plot_pair_survival <- function(
       pairs$gene2[1],
       "\nlog-rank p = ",
       format.pval(logrank_p, digits = 3),
-      if (is.finite(cox_hr)) paste0(", HR = ", sprintf("%.2f", cox_hr)) else ""
+      if (is.finite(cox_hr)) paste0(", HR ", .format_hr(cox_hr)) else ""
     )
   }
 
@@ -470,6 +470,16 @@ plot_pair_survival <- function(
     "#999999"
   )
   rep(palette, length.out = n)
+}
+
+.format_hr <- function(hr) {
+  if (!is.finite(hr)) {
+    return(NA_character_)
+  }
+  if (hr < 0.01) {
+    return("< 0.01")
+  }
+  paste0("= ", sprintf("%.2f", hr))
 }
 
 .compact_margins <- function(mar) {
