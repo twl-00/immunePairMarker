@@ -10,6 +10,8 @@ other immune response studies. Instead of testing each gene independently, it
 tests whether the relative expression order between two genes is associated
 with response status.
 
+![immunePair workflow overview](man/figures/immunePair-workflow.svg)
+
 ## Installation
 
 You can install the development version from GitHub:
