@@ -52,6 +52,35 @@ head(result$pairs)
 head(result$sig_pairs)
 ```
 
+Basic downstream plots can be generated directly from the result object:
+
+```r
+plot_top_pairs_barplot(result, top_n = 10, metric = "adjusted_p")
+plot_pair_roc(result, top_n = 3, score = "state")
+plot_pair_state_heatmap(result, top_n = 10)
+```
+
+If the clinical table contains survival time and event columns, a Kaplan-Meier
+curve can also be drawn for a selected gene pair:
+
+```r
+plot_pair_survival(
+  result,
+  gene1 = "GENE_A",
+  gene2 = "GENE_B",
+  time_col = "OS_time",
+  event_col = "OS_status"
+)
+
+plot_pair_survival(
+  result,
+  gene1 = "GENE_A",
+  gene2 = "GENE_B",
+  time_col = "PFS_time",
+  event_col = "PFS_status"
+)
+```
+
 ## Method Overview
 
 `immunePair` uses the following workflow:
@@ -89,9 +118,9 @@ The clinical file should be a tab-delimited text file. The first column should
 contain sample IDs, and one column should contain the response label.
 
 ```text
-sample  response
-S1      response
-S2      non_response
+sample  response      OS_time  OS_status  PFS_time  PFS_status
+S1      response      36       0          18        0
+S2      non_response  12       1          5         1
 ```
 
 Sample IDs in the clinical file should match sample names in the expression
@@ -109,6 +138,9 @@ Important input requirements:
 - The first column of the clinical file is used as sample IDs.
 - The value supplied to `response_label` must appear in the `response_col`
   column.
+- Survival columns are optional. If provided, time columns such as `OS_time` or
+  `PFS_time` should be numeric, and event columns such as `OS_status` or
+  `PFS_status` should use 1 for event and 0 for censored.
 
 ## Parameters
 
@@ -164,6 +196,27 @@ When `out_dir` is provided, the workflow writes:
 - `<dataset_name>_chisq_fisher_bh.txt`
 - `<dataset_name>_sig_pairs_adjP<sig_cutoff>.txt`, if significant pairs are
   found
+
+## Downstream Plots
+
+`immunePair` provides several base R plotting functions for quick downstream
+inspection:
+
+- `plot_top_pairs_barplot()`: bar plot of top gene pairs by adjusted p-value or
+  odds ratio
+- `plot_pair_roc()`: ROC curve for one or more gene pairs, using either binary
+  pair state or continuous expression difference
+- `plot_pair_state_heatmap()`: heatmap of pair states across samples
+- `plot_pair_survival()`: Kaplan-Meier curve when survival time and event
+  columns are available
+
+All plotting functions draw to the active graphics device by default. To save a
+plot directly, provide a file path:
+
+```r
+plot_pair_roc(result, top_n = 3, file = "pair_roc.pdf")
+plot_pair_state_heatmap(result, top_n = 10, file = "pair_state_heatmap.png")
+```
 
 ## Result Interpretation
 

@@ -1,9 +1,9 @@
-sample	response	group
-S1	response	A
-S2	response	A
-S3	response	A
-S4	response	A
-S5	non_response	B
-S6	non_response	B
-S7	non_response	B
-S8	non_response	B
+sample	response	group	OS_time	OS_status	PFS_time	PFS_status
+S1	response	A	36	0	18	0
+S2	response	A	30	1	15	1
+S3	response	A	28	0	14	0
+S4	response	A	24	1	12	1
+S5	non_response	B	14	1	6	1
+S6	non_response	B	12	1	5	1
+S7	non_response	B	10	0	4	0
+S8	non_response	B	8	1	3	1
