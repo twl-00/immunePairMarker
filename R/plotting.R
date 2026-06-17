@@ -6,8 +6,8 @@
 #' @param top_n Number of top pairs to plot when `gene1` and `gene2` are not
 #'   supplied.
 #' @param delta Pairwise expression difference cutoff.
-#' @param score Score used for ROC analysis. `difference` uses the continuous
-#'   expression difference `gene1 - gene2`; `state` uses the 0/1 pair state.
+#' @param score Deprecated. ROC analysis always uses the continuous expression
+#'   difference `gene1 - gene2`.
 #' @param response_col Clinical column containing response labels.
 #' @param response_label Label treated as response.
 #' @param use_sig_pairs If `TRUE`, use `result$sig_pairs` when available.
@@ -26,7 +26,7 @@ plot_pair_roc <- function(
     gene2 = NULL,
     top_n = 1,
     delta = 0.25,
-    score = c("difference", "state"),
+    score = "difference",
     response_col = "response",
     response_label = "response",
     use_sig_pairs = TRUE,
@@ -37,7 +37,12 @@ plot_pair_roc <- function(
     height = 6,
     main = NULL) {
 
-  score <- match.arg(score)
+  if (!identical(score, "difference")) {
+    warning(
+      "score is deprecated; plot_pair_roc() now uses the continuous expression difference.",
+      call. = FALSE
+    )
+  }
   direction <- match.arg(direction)
   expr <- .get_result_expr(result)
   resp <- .get_result_response(
@@ -62,7 +67,7 @@ plot_pair_roc <- function(
 
   single_pair <- nrow(pairs) == 1
   if (is.null(main)) {
-    main <- if (score == "difference") "Pair-difference ROC" else "Pair-state ROC"
+    main <- "Pair ROC"
   }
 
   graphics::plot(
@@ -75,9 +80,13 @@ plot_pair_roc <- function(
     ylab = "Sensitivity",
     main = if (single_pair) "" else main,
     xaxs = "i",
-    yaxs = "i"
+    yaxs = "i",
+    axes = FALSE
   )
   graphics::abline(0, 1, lty = 2, col = "grey70")
+  graphics::axis(1)
+  graphics::axis(2)
+  graphics::box()
 
   colors <- .plot_colors(nrow(pairs))
   auc_rows <- vector("list", nrow(pairs))
@@ -90,7 +99,7 @@ plot_pair_roc <- function(
       delta = delta,
       log_transform = log_transform
     )
-    marker <- if (score == "state") pair_scores$state else pair_scores$score
+    marker <- pair_scores$score
     common <- intersect(names(marker), names(resp))
     roc <- .compute_roc(
       response = resp[common],
@@ -99,18 +108,11 @@ plot_pair_roc <- function(
     )
 
     graphics::lines(
-      .nudge_roc_axis(roc$fpr),
-      .nudge_roc_axis(roc$tpr, upper = TRUE),
+      roc$fpr,
+      roc$tpr,
       col = colors[i],
       lwd = 3,
       type = "s"
-    )
-    graphics::points(
-      .nudge_roc_axis(roc$fpr),
-      .nudge_roc_axis(roc$tpr, upper = TRUE),
-      col = colors[i],
-      pch = 16,
-      cex = 0.8
     )
     auc_rows[[i]] <- data.frame(
       gene1 = pairs$gene1[i],
@@ -413,32 +415,23 @@ plot_pair_survival <- function(
 }
 
 .roc_points <- function(response, score) {
-  thresholds <- sort(unique(score), decreasing = TRUE)
   pos_n <- sum(response == 1)
   neg_n <- sum(response == 0)
-  tpr <- numeric(length(thresholds))
-  fpr <- numeric(length(thresholds))
-  for (i in seq_along(thresholds)) {
-    pred <- score >= thresholds[i]
-    tpr[i] <- sum(pred & response == 1) / pos_n
-    fpr[i] <- sum(pred & response == 0) / neg_n
-  }
-  fpr <- c(0, fpr, 1)
-  tpr <- c(0, tpr, 1)
-  ord <- order(fpr, tpr)
-  fpr <- fpr[ord]
-  tpr <- tpr[ord]
-  auc <- sum(diff(fpr) * (head(tpr, -1) + tail(tpr, -1)) / 2)
-  list(fpr = fpr, tpr = tpr, auc = auc)
-}
 
-.nudge_roc_axis <- function(x, upper = FALSE, eps = 0.006) {
-  if (upper) {
-    x[x >= 1] <- 1 - eps
-  } else {
-    x[x <= 0] <- eps
-  }
-  x
+  ord <- order(score, decreasing = TRUE)
+  response <- response[ord]
+  score <- score[ord]
+
+  score_groups <- rle(score)
+  threshold_end <- cumsum(score_groups$lengths)
+  tp <- cumsum(response == 1)[threshold_end]
+  fp <- cumsum(response == 0)[threshold_end]
+
+  fpr <- c(0, fp / neg_n)
+  tpr <- c(0, tp / pos_n)
+  auc <- sum(diff(fpr) * (head(tpr, -1) + tail(tpr, -1)) / 2)
+
+  list(fpr = fpr, tpr = tpr, auc = auc)
 }
 
 .open_plot_device <- function(file = NULL, width = 7, height = 5, res = 150) {
