@@ -66,7 +66,7 @@ plot_top_pairs_barplot <- function(
     close_device()
   }, add = TRUE)
 
-  graphics::par(mar = c(5, max(8, min(16, max(nchar(labels)) * 0.35)), 4, 2))
+  graphics::par(mar = .compact_margins(c(4.5, 6, 3, 1)))
   graphics::barplot(
     rev(values),
     names.arg = rev(labels),
@@ -75,7 +75,8 @@ plot_top_pairs_barplot <- function(
     col = rev(col),
     border = NA,
     xlab = xlab,
-    main = main
+    main = main,
+    cex.names = 0.75
   )
 
   invisible(pair_df)
@@ -277,7 +278,7 @@ plot_pair_state_heatmap <- function(
 
   row_labels <- rownames(plot_mat)
   col_labels <- colnames(plot_mat)
-  graphics::par(mar = c(7, max(8, min(18, max(nchar(row_labels)) * 0.35)), 4, 6))
+  graphics::par(mar = .compact_margins(c(5, 6, 3, 4)))
   graphics::image(
     x = seq_len(ncol(plot_mat)),
     y = seq_len(nrow(plot_mat)),
@@ -401,7 +402,7 @@ plot_pair_survival <- function(
   logrank <- survival::survdiff(surv_obj ~ group, data = surv_df)
   logrank_p <- stats::pchisq(logrank$chisq, df = length(logrank$n) - 1, lower.tail = FALSE)
   cox_hr <- NA_real_
-  cox_fit <- try(survival::coxph(surv_obj ~ group, data = surv_df), silent = TRUE)
+  cox_fit <- suppressWarnings(try(survival::coxph(surv_obj ~ group, data = surv_df), silent = TRUE))
   if (!inherits(cox_fit, "try-error")) {
     cox_hr <- unname(exp(stats::coef(cox_fit))[1])
   }
@@ -419,11 +420,12 @@ plot_pair_survival <- function(
       " / ",
       pairs$gene2[1],
       "\nlog-rank p = ",
-      stats::format.pval(logrank_p, digits = 3),
+      format.pval(logrank_p, digits = 3),
       if (is.finite(cox_hr)) paste0(", HR = ", sprintf("%.2f", cox_hr)) else ""
     )
   }
 
+  graphics::par(mar = .compact_margins(c(4.5, 4.5, 3, 1)))
   graphics::plot(
     fit,
     col = c("#0072B2", "#D55E00"),
@@ -644,4 +646,30 @@ plot_pair_survival <- function(
     "#999999"
   )
   rep(palette, length.out = n)
+}
+
+.compact_margins <- function(mar) {
+  din <- tryCatch(graphics::par("din"), error = function(e) c(7, 5))
+  line_height <- tryCatch(
+    graphics::par("csi") * graphics::par("mex"),
+    error = function(e) 0.2
+  )
+  if (!is.finite(line_height) || line_height <= 0) {
+    line_height <- 0.2
+  }
+
+  max_width_lines <- max(2.5, din[1] / line_height - 1)
+  max_height_lines <- max(2.5, din[2] / line_height - 1)
+  min_mar <- c(1.8, 2.2, 1.5, 0.5)
+
+  mar <- pmax(mar, min_mar)
+  if (sum(mar[c(2, 4)]) >= max_width_lines) {
+    scale <- (max_width_lines * 0.85) / sum(mar[c(2, 4)])
+    mar[c(2, 4)] <- pmax(mar[c(2, 4)] * scale, min_mar[c(2, 4)])
+  }
+  if (sum(mar[c(1, 3)]) >= max_height_lines) {
+    scale <- (max_height_lines * 0.85) / sum(mar[c(1, 3)])
+    mar[c(1, 3)] <- pmax(mar[c(1, 3)] * scale, min_mar[c(1, 3)])
+  }
+  mar
 }
