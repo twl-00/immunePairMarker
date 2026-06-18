@@ -10,7 +10,7 @@ other immune response studies. Instead of testing each gene independently, it
 tests whether the relative expression order between two genes is associated
 with response status.
 
-![immunePair workflow overview](man/figures/immunePair-workflow.svg)
+![immunePair workflow overview](man/figures/immunePair-workflow.png)
 
 Editable workflow PDF: [immunePair-workflow-editable.pdf](man/figures/immunePair-workflow-editable.pdf)
 
