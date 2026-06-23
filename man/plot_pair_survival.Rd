@@ -28,7 +28,8 @@ plot_pair_survival(
 
 \item{time_col}{Clinical column containing survival time.}
 
-\item{event_col}{Clinical column containing event status, where 1 indicates event and 0 indicates censored.}
+\item{event_col}{Clinical column containing event status, where 1 indicates
+event and 0 indicates censored.}
 
 \item{use_sig_pairs}{If \code{TRUE}, use \code{result$sig_pairs} when available.}
 
@@ -43,13 +44,9 @@ plot_pair_survival(
 \item{main}{Plot title.}
 }
 \value{
-A list with the plotted data, survival fit, log-rank p-value, and Cox hazard ratio, invisibly.
+A list with the plotted data, survival fit, log-rank p-value, and
+Cox hazard ratio, invisibly.
 }
 \description{
 Plot a Kaplan-Meier curve for a gene pair
-}
-\details{
-The same function can be used for OS, PFS, or other survival endpoints by
-passing the corresponding time and event columns, for example
-\code{time_col = "OS_time"} and \code{event_col = "OS_status"}.
 }

@@ -28,13 +28,16 @@ plot_pair_roc(
 \arguments{
 \item{result}{Result list returned by \code{\link[=run_pair_marker_analysis]{run_pair_marker_analysis()}}.}
 
-\item{gene1, gene2}{Optional gene names. If omitted, top pairs are selected from the result table.}
+\item{gene1, gene2}{Optional gene names. If omitted, top pairs are selected
+from the result table.}
 
-\item{top_n}{Number of top pairs to plot when \code{gene1} and \code{gene2} are not supplied.}
+\item{top_n}{Number of top pairs to plot when \code{gene1} and \code{gene2} are not
+supplied.}
 
 \item{delta}{Pairwise expression difference cutoff.}
 
-\item{score}{Deprecated. ROC analysis always uses the continuous expression difference \code{gene1 - gene2}.}
+\item{score}{Deprecated. ROC analysis always uses the continuous expression
+difference \code{gene1 - gene2}.}
 
 \item{phenotype_col}{Clinical column containing phenotype labels.}
 
@@ -47,7 +50,8 @@ plot_pair_roc(
 
 \item{use_sig_pairs}{If \code{TRUE}, use \code{result$sig_pairs} when available.}
 
-\item{direction}{If \code{auto}, scores are reversed when the initial AUC is below 0.5.}
+\item{direction}{If \code{auto}, scores are reversed when the initial AUC is below
+0.5.}
 
 \item{log_transform}{If \code{TRUE}, use \code{log2(expression + 1)} before comparison.}
 
@@ -64,13 +68,4 @@ A data frame with AUC values, invisibly.
 }
 \description{
 Plot ROC curves for gene pairs
-}
-\details{
-The main screening workflow uses binary pairwise expression states, such as
-\code{gene1 > gene2} or \code{gene1 < gene2}. ROC analysis uses the continuous
-expression difference \code{gene1 - gene2} by default, after the internal
-\code{log2(expression + 1)} transformation, because ROC curves require ranking
-information across samples. A positive score means that \code{gene1} is higher
-than \code{gene2}, and a larger score means a stronger relative expression
-difference.
 }

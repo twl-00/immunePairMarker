@@ -278,6 +278,71 @@ When `out_dir` is provided, the workflow writes:
 - `<dataset_name>_sig_pairs_adjP<sig_cutoff>.txt`, if significant pairs are
   found
 
+## Multi-dataset Integration
+
+After running pair-marker screening in several independent datasets,
+`PairMarker` can optionally integrate the result tables to identify recurrent
+and directionally consistent gene pairs. This step is useful when a single
+dataset produces many significant pairs and you want to prioritize pairs that
+are repeatedly observed across cohorts.
+
+The integration step uses:
+
+- how many datasets contain the pair as significant
+- which datasets support the pair
+- the minimum adjusted p-value across datasets
+- the mean and median log2 odds ratio
+- OR-direction consistency across datasets
+- an evidence score based on `-log10(adjusted_p)`
+
+Example using result files written by `run_pair_marker_analysis()`:
+
+```r
+pair_files <- c(
+  GSE91061 = "GSE91061_chisq_fisher_bh.txt",
+  GSE78220 = "GSE78220_chisq_fisher_bh.txt",
+  PRJEB23709 = "PRJEB23709_chisq_fisher_bh.txt"
+)
+
+integrated <- integrate_pair_results(
+  pair_results = pair_files,
+  fdr_cutoff = 0.05,
+  min_datasets = 2,
+  min_direction_consistency = 0.67
+)
+
+head(integrated$summary)
+```
+
+The same function also accepts in-memory result tables:
+
+```r
+integrated <- integrate_pair_results(
+  list(
+    cohort1 = result1$pairs,
+    cohort2 = result2$pairs,
+    cohort3 = result3$pairs
+  ),
+  min_datasets = 2
+)
+```
+
+To write the integrated table:
+
+```r
+write_integrated_pair_results(
+  integrated,
+  file = "stable_gene_pairs.tsv",
+  include_all = TRUE
+)
+```
+
+The main output is `integrated$summary`, where higher-priority pairs are ranked
+by more supporting datasets, stronger evidence scores, smaller adjusted
+p-values, and more consistent OR directions. When `canonicalize_pairs = TRUE`,
+the default, pairs such as `GENE_A|GENE_B` and `GENE_B|GENE_A` are treated as
+the same pair and the OR direction is harmonized.
+
 ## Downstream Plots
 
 `PairMarker` provides base R plotting functions for quick downstream inspection:

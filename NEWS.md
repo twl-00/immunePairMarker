@@ -4,6 +4,10 @@
 - Generalized the workflow from immune response labels to binary phenotype labels.
 - Added `phenotype_col`, `positive_label`, and `negative_label` arguments while
   keeping `response_col` and `response_label` as deprecated aliases.
+- Added optional multi-dataset integration functions for recurrent and
+  directionally consistent gene-pair prioritization:
+  `integrate_pair_results()`, `read_pair_result()`, and
+  `write_integrated_pair_results()`.
 
 # immunePair 0.1.0
 

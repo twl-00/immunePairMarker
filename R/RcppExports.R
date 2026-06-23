@@ -2,6 +2,6 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 pairwise_chisq_cpp <- function(mat, resp, min_prop = 0.05, max_prop = 0.95, chisq_cutoff = 0.01, diff_cutoff = 0.0, min_valid_prop = 0.5) {
-    .Call(`_PairMarker_pairwise_chisq_cpp`, PACKAGE = 'PairMarker', mat, resp, min_prop, max_prop, chisq_cutoff, diff_cutoff, min_valid_prop)
+    .Call(`_PairMarker_pairwise_chisq_cpp`, mat, resp, min_prop, max_prop, chisq_cutoff, diff_cutoff, min_valid_prop)
 }
 
