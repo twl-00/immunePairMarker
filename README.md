@@ -203,6 +203,29 @@ S2      non_response  12       1          5         1
 Sample IDs in the clinical file should match sample names in the expression
 matrix.
 
+For multi-dataset integration, each dataset should provide a pair result table.
+The easiest way to generate this file is to run `run_pair_marker_analysis()`
+with `out_dir` set, then use the written `<dataset_name>_chisq_fisher_bh.txt`
+file. A minimal pair result table looks like this:
+
+```text
+gene1   gene2   OR    fisher_p  adjusted_p
+CD8A    PDCD1   5.2   0.0004    0.004
+CXCL9   LAG3    3.1   0.0060    0.030
+MKI67   TOP2A   0.8   0.2000    0.500
+```
+
+The required columns for `integrate_pair_results()` are:
+
+- `gene1` and `gene2`: the two genes in the pair
+- `OR`: odds ratio from Fisher's exact test
+- `fisher_p`: Fisher's exact test p-value
+- `adjusted_p`: adjusted p-value used to define significant pairs
+
+If `adjusted_p` is missing, `PairMarker` will calculate it from `fisher_p`.
+Older result tables with a single pair column, such as `gene = "CD8A|PDCD1"`,
+are also supported.
+
 Important input requirements:
 
 - Rows of the expression file represent genes and columns represent samples.
@@ -297,13 +320,58 @@ The integration step uses:
 - OR-direction consistency across datasets
 - an evidence score based on `-log10(adjusted_p)`
 
+Toy example with three artificial pair-result tables:
+
+```r
+cohort1_pairs <- data.frame(
+  gene1 = c("CD8A", "CXCL9", "MKI67"),
+  gene2 = c("PDCD1", "LAG3", "TOP2A"),
+  OR = c(5.2, 3.1, 0.8),
+  fisher_p = c(0.0004, 0.006, 0.20),
+  adjusted_p = c(0.004, 0.03, 0.50)
+)
+
+cohort2_pairs <- data.frame(
+  gene1 = c("CD8A", "CXCL9", "GZMB"),
+  gene2 = c("PDCD1", "LAG3", "IFNG"),
+  OR = c(4.4, 2.6, 0.7),
+  fisher_p = c(0.001, 0.008, 0.10),
+  adjusted_p = c(0.006, 0.04, 0.30)
+)
+
+cohort3_pairs <- data.frame(
+  gene1 = c("CD8A", "CXCL10", "MKI67"),
+  gene2 = c("PDCD1", "TIGIT", "TOP2A"),
+  OR = c(6.0, 2.2, 1.3),
+  fisher_p = c(0.0002, 0.02, 0.09),
+  adjusted_p = c(0.003, 0.08, 0.25)
+)
+
+integrated <- integrate_pair_results(
+  pair_results = list(
+    cohort1 = cohort1_pairs,
+    cohort2 = cohort2_pairs,
+    cohort3 = cohort3_pairs
+  ),
+  fdr_cutoff = 0.05,
+  min_datasets = 2,
+  min_direction_consistency = 0.67
+)
+
+integrated$summary
+```
+
+In this toy example, `CD8A|PDCD1` is prioritized because it is significant in
+three datasets with a consistent OR direction. `CXCL9|LAG3` is also retained
+when `min_datasets = 2`, because it is significant in two datasets.
+
 Example using result files written by `run_pair_marker_analysis()`:
 
 ```r
 pair_files <- c(
-  GSE91061 = "GSE91061_chisq_fisher_bh.txt",
-  GSE78220 = "GSE78220_chisq_fisher_bh.txt",
-  PRJEB23709 = "PRJEB23709_chisq_fisher_bh.txt"
+  cohort_A = "cohort_A_chisq_fisher_bh.txt",
+  cohort_B = "cohort_B_chisq_fisher_bh.txt",
+  cohort_C = "cohort_C_chisq_fisher_bh.txt"
 )
 
 integrated <- integrate_pair_results(

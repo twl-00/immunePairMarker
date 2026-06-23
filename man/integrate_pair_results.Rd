@@ -52,3 +52,32 @@ A list with \code{summary}, \code{all_pairs}, and \code{significant_pairs}.
 \description{
 Integrate significant gene pairs across datasets
 }
+\examples{
+cohort1_pairs <- data.frame(
+  gene1 = c("CD8A", "CXCL9", "MKI67"),
+  gene2 = c("PDCD1", "LAG3", "TOP2A"),
+  OR = c(5.2, 3.1, 0.8),
+  fisher_p = c(0.0004, 0.006, 0.20),
+  adjusted_p = c(0.004, 0.03, 0.50)
+)
+cohort2_pairs <- data.frame(
+  gene1 = c("CD8A", "CXCL9", "GZMB"),
+  gene2 = c("PDCD1", "LAG3", "IFNG"),
+  OR = c(4.4, 2.6, 0.7),
+  fisher_p = c(0.001, 0.008, 0.10),
+  adjusted_p = c(0.006, 0.04, 0.30)
+)
+cohort3_pairs <- data.frame(
+  gene1 = c("CD8A", "CXCL10", "MKI67"),
+  gene2 = c("PDCD1", "TIGIT", "TOP2A"),
+  OR = c(6.0, 2.2, 1.3),
+  fisher_p = c(0.0002, 0.02, 0.09),
+  adjusted_p = c(0.003, 0.08, 0.25)
+)
+
+integrated <- integrate_pair_results(
+  list(cohort1 = cohort1_pairs, cohort2 = cohort2_pairs, cohort3 = cohort3_pairs),
+  min_datasets = 2
+)
+integrated$summary
+}

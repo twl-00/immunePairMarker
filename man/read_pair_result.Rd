@@ -41,3 +41,8 @@ A data frame with one row per gene pair in one dataset.
 \description{
 Read one pair-marker result table for multi-dataset integration
 }
+\details{
+A minimal input table should contain \code{gene1}, \code{gene2}, \code{OR},
+\code{fisher_p}, and \code{adjusted_p}. Older tables with a single pair column
+such as \code{gene = "CD8A|PDCD1"} are also supported.
+}
