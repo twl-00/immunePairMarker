@@ -75,9 +75,52 @@ plot_pair_survival(
 )
 ```
 
+## Response and Non-response Definitions
+
+In `PairMarker`, `response` and `non_response` are example labels, not fixed
+package-specific categories. The package only requires a binary phenotype
+definition:
+
+- `phenotype_col` is the column in the clinical table that contains the group
+  label.
+- `positive_label` is the label coded as 1. In an immunotherapy study, this is
+  often the response group.
+- `negative_label` is the label coded as 0. In an immunotherapy study, this is
+  often the non-response group.
+
+For immunotherapy datasets, the response group is usually defined by the
+clinical response criteria used in the original study. For example, patients
+with complete response or partial response may be coded as `response`, while
+patients with progressive disease may be coded as `non_response`. Stable
+disease can be handled according to the study design: it may be grouped with
+response, grouped with non-response, or excluded by setting `negative_label`
+explicitly and leaving stable-disease samples outside the two selected labels.
+
+The label names do not need to be literally `response` and `non_response`.
+For example, the same workflow can compare `sensitive` versus `resistant`,
+`tumor` versus `normal`, `mutant` versus `wildtype`, or `high_risk` versus
+`low_risk`. The important point is that the two groups should represent a
+biologically or clinically meaningful contrast.
+
+If `negative_label = NULL`, all samples that are not `positive_label` are coded
+as 0. This is useful for one-versus-rest comparisons. If `negative_label` is
+supplied, only samples matching `positive_label` or `negative_label` are used,
+and samples with other labels are excluded from pair screening.
+
 ## Generic Binary Phenotype Examples
 
-Immunotherapy response:
+Common use cases:
+
+| Application | `phenotype_col` | `positive_label` | `negative_label` | Interpretation |
+| --- | --- | --- | --- | --- |
+| Immunotherapy response | `"response"` | `"response"` | `"non_response"` | Gene pairs associated with treatment response status. |
+| Drug sensitivity | `"drug_status"` | `"sensitive"` | `"resistant"` | Gene pairs associated with sensitivity or resistance to a drug. |
+| Disease comparison | `"disease_status"` | `"tumor"` | `"normal"` | Gene pairs associated with disease versus control status. |
+| Mutation status | `"TP53_status"` | `"mutant"` | `"wildtype"` | Gene pairs associated with a mutation-defined subgroup. |
+| Risk group | `"risk_group"` | `"high"` | `"low"` | Gene pairs associated with high-risk versus low-risk labels. |
+| Molecular subtype | `"subtype"` | `"classical"` | `NULL` | Gene pairs associated with one subtype versus all other subtypes. |
+
+Immunotherapy response example:
 
 ```r
 run_pair_marker_analysis(
@@ -112,10 +155,6 @@ run_pair_marker_analysis(
   negative_label = "wildtype"
 )
 ```
-
-If `negative_label = NULL`, all samples that are not `positive_label` are coded
-as 0. If `negative_label` is supplied, samples with other labels are excluded
-from the pairwise screening.
 
 ## Method Overview
 
